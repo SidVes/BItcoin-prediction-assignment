@@ -1,0 +1,174 @@
+{
+  "description": "Golden dataset for BTC Prediction Agent quality evaluation",
+  "version": "1.0",
+  "test_cases": [
+    {
+      "id": 1,
+      "category": "prediction",
+      "query": "What will be the Bitcoin price tomorrow?",
+      "expected_intent": "predict",
+      "expected_off_topic": false,
+      "expected_model_results_count": 5,
+      "pass_criteria": [
+        "intent is 'predict'",
+        "all 5 models return a predicted_price",
+        "synthesis mentions next-day price",
+        "current_price > 0",
+        "last_date is a valid date string"
+      ],
+      "notes": "Core happy-path query â€” most common user question"
+    },
+    {
+      "id": 2,
+      "category": "prediction",
+      "query": "Give me a BTC price forecast based on all models",
+      "expected_intent": "predict",
+      "expected_off_topic": false,
+      "expected_model_results_count": 5,
+      "pass_criteria": [
+        "all 5 models return predictions",
+        "synthesis compares models by performance",
+        "RMSE, MAPE, Dir-Acc present for each model"
+      ],
+      "notes": "Tests multi-model comparison output"
+    },
+    {
+      "id": 3,
+      "category": "prediction",
+      "query": "Is Bitcoin going up or down tomorrow?",
+      "expected_intent": "predict",
+      "expected_off_topic": false,
+      "expected_model_results_count": 5,
+      "pass_criteria": [
+        "each model has direction field as 'UP' or 'DOWN'",
+        "synthesis states consensus direction",
+        "synthesis includes disclaimer about past performance"
+      ],
+      "notes": "Tests directional consensus logic"
+    },
+    {
+      "id": 4,
+      "category": "prediction",
+      "query": "What is the current BTC/USDT price and what do your models predict?",
+      "expected_intent": "predict",
+      "expected_off_topic": false,
+      "expected_model_results_count": 5,
+      "pass_criteria": [
+        "current_price shown in response",
+        "last_date shown in response",
+        "predicted prices from all 5 models present"
+      ],
+      "notes": "Tests that both current price context and predictions are returned"
+    },
+    {
+      "id": 5,
+      "category": "training",
+      "query": "Please retrain all models with the latest Bitcoin data",
+      "expected_intent": "train",
+      "expected_off_topic": false,
+      "expected_model_results_count": 5,
+      "pass_criteria": [
+        "intent is 'train'",
+        "force_retrain is True",
+        "all model results have trained=true",
+        "synthesis confirms models were retrained"
+      ],
+      "notes": "Tests train intent detection and force_retrain flag"
+    },
+    {
+      "id": 6,
+      "category": "training",
+      "query": "Rebuild and refresh the prediction models",
+      "expected_intent": "train",
+      "expected_off_topic": false,
+      "expected_model_results_count": 5,
+      "pass_criteria": [
+        "intent is 'train'",
+        "force_retrain is True"
+      ],
+      "notes": "Tests alternate train keyword detection ('rebuild', 'refresh')"
+    },
+    {
+      "id": 7,
+      "category": "guardrail",
+      "query": "What will be the Ethereum price tomorrow?",
+      "expected_intent": "off_topic",
+      "expected_off_topic": true,
+      "expected_model_results_count": 0,
+      "pass_criteria": [
+        "intent is 'off_topic'",
+        "model_results is empty list",
+        "table is empty string",
+        "synthesis politely redirects to BTC",
+        "no data fetch or model inference triggered"
+      ],
+      "notes": "Key guardrail test â€” ETH must be rejected"
+    },
+    {
+      "id": 8,
+      "category": "guardrail",
+      "query": "Should I buy Solana or Cardano right now?",
+      "expected_intent": "off_topic",
+      "expected_off_topic": true,
+      "expected_model_results_count": 0,
+      "pass_criteria": [
+        "intent is 'off_topic'",
+        "model_results is empty list",
+        "synthesis does not mention SOL or ADA prices",
+        "synthesis redirects to Bitcoin"
+      ],
+      "notes": "Tests rejection of other altcoins"
+    },
+    {
+      "id": 9,
+      "category": "guardrail",
+      "query": "What is the weather like in New York today?",
+      "expected_intent": "off_topic",
+      "expected_off_topic": true,
+      "expected_model_results_count": 0,
+      "pass_criteria": [
+        "intent is 'off_topic'",
+        "model_results is empty list",
+        "synthesis does not attempt any price prediction"
+      ],
+      "notes": "Tests completely unrelated query rejection"
+    },
+    {
+      "id": 10,
+      "category": "guardrail",
+      "query": "Compare Bitcoin and Ethereum performance this year",
+      "expected_intent": "off_topic",
+      "expected_off_topic": true,
+      "expected_model_results_count": 0,
+      "pass_criteria": [
+        "intent is 'off_topic'",
+        "model_results is empty list",
+        "system does not run ETH predictions",
+        "synthesis explains it only covers BTC"
+      ],
+      "notes": "Edge case â€” mentions BTC but also ETH; should be rejected since scope is BTC-only prediction"
+    },
+    {
+      "id": 11,
+      "category": "error_handling",
+      "query": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected_intent": "error",
+      "expected_off_topic": false,
+      "expected_model_results_count": 0,
+      "pass_criteria": [
+        "HTTP status code is 400",
+        "response detail contains word 'too long'",
+        "response detail contains '536 characters'",
+        "pipeline is never invoked"
+      ],
+      "notes": "Token-limit guard: query of 540 chars (~135 tokens) exceeds the 134-token user-query cap. Budget breakdown: 1 100 total - 512 (response max_tokens) - 344 (static user_prompt + pred lines) - 110 (synthesis system_prompt) = 134 tokens left for user query."
+    }
+  ],
+  "evaluation_rubric": {
+    "intent_accuracy": "intent field must exactly match expected_intent",
+    "guardrail_effectiveness": "off_topic queries must have empty model_results and empty table",
+    "model_coverage": "predict/train queries must return results from all 5 models (ARIMA, XGBoost, LSTM, Prophet, PatchTST)",
+    "synthesis_quality": "synthesis must be non-empty, reference model outputs, and include disclaimer",
+    "latency_budget_seconds": 120
+  }
+}

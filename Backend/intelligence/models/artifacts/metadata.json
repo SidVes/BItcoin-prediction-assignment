@@ -1,0 +1,17 @@
+{
+  "Prophet": {
+    "last_data_date": "1970-01-01"
+  },
+  "ARIMA(0,1,0)": {
+    "last_data_date": "1970-01-01"
+  },
+  "XGBoost": {
+    "last_data_date": "1970-01-01"
+  },
+  "LSTM (Bidirectional)": {
+    "last_data_date": "1970-01-01"
+  },
+  "PatchTST (Transformer)": {
+    "last_data_date": "1970-01-01"
+  }
+}

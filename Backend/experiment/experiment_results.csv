@@ -1,0 +1,6 @@
+model,RMSE,MAPE,Dir_Accuracy
+"ARIMA(0, 1, 0)",2514.41,2.32,57.63
+XGBoost,4171.44,4.32,57.63
+LSTM,6100.28,6.04,49.15
+Prophet,21837.03,28.5,49.15
+PatchTST (fine-tuned),14883.76,18.45,52.54

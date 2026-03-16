@@ -1,0 +1,77 @@
+<div class="chat-shell">
+  <header>
+    <span class="logo">&#8383; BTC Prediction Agent</span>
+    <span class="subtitle">Ask about Bitcoin price predictions</span>
+  </header>
+
+  <div class="messages">
+    @for (msg of messages(); track $index) {
+      <div class="bubble-row" [class.user-row]="msg.role === 'user'">
+        <div class="bubble" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+          <p class="text">{{ msg.text }}</p>
+
+          @if (msg.response) {
+            @if (msg.response.model_results?.length) {
+            <div class="meta">
+              <span class="chip">Data as of: {{ msg.response.last_date }}</span>
+              <span class="chip price">Last Close: ${{ msg.response.current_price | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Model</th>
+                    <th>Predicted Price</th>
+                    <th>RMSE</th>
+                    <th>MAPE %</th>
+                    <th>Dir. Acc %</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of msg.response.model_results; track r.model) {
+                    <tr [class.error-row]="!r.predicted_price">
+                      <td>{{ r.model }}</td>
+                      <td>{{ r.predicted_price != null ? ('$' + (r.predicted_price | number:'1.2-2')) : '&#8212;' }}</td>
+                      <td>{{ r.rmse != null ? (r.rmse | number:'1.2-2') : '&#8212;' }}</td>
+                      <td>{{ r.mape != null ? (r.mape | number:'1.2-2') : '&#8212;' }}</td>
+                      <td>{{ r.dir_accuracy != null ? (r.dir_accuracy | number:'1.1-1') : '&#8212;' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            } <!-- end @if model_results -->
+          }
+        </div>
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="bubble-row">
+        <div class="bubble assistant loading-bubble">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error-bar">&#9888; {{ error() }}</div>
+    }
+
+    <div #messagesEnd></div>
+  </div>
+
+  <div class="input-bar">
+    <textarea
+      [(ngModel)]="input"
+      (keydown)="onKeydown($event)"
+      placeholder="Ask about BTC price prediction…"
+      rows="1"
+      [disabled]="loading()"
+    ></textarea>
+    <button (click)="send()" [disabled]="loading() || !input.trim()">
+      {{ loading() ? '…' : 'Send' }}
+    </button>
+  </div>
+</div>
